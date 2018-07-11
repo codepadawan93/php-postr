@@ -3,10 +3,8 @@
 namespace Postr\Enums;
 
 final class HttpVerbs {
-	public static final $get    = 1;
-	public static final $post   = 2;
-	public static final $put    = 3;
-	public static final $delete = 4;
+	const get    = 1;
+	const post   = 2;
+	const put    = 3;
+	const delete = 4;
 }
-
-?>
