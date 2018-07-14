@@ -4,19 +4,23 @@ namespace Postr\Core;
 
 use Postr\Utils\Utils;
 use Postr\Enums\HttpVerbs;
+use Postr\Exceptions\PostrException;
 
 class HttpClient {
 
 	private $endpoint;
 	private $headers = [];
 	private $client = null;
-	private $code = 0;
+	private $response;
 
 	public function __construct()
 	{
 		$this->client = curl_init();
 		curl_setopt($this->client, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($this->client, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+		curl_setopt($this->client, CURLOPT_VERBOSE, true);
+		curl_setopt($this->client, CURLOPT_HEADER, true);
+		$this->response = new HttpResponse(0, "", "");
 	}
 
 	public function toString()
@@ -69,17 +73,25 @@ class HttpClient {
 				curl_setopt($this->client, CURLOPT_CUSTOMREQUEST, "DELETE");
 				break;
 			default:
+				throw new PostrException("Invalid HTTP method '$method'.");
 				break;
 		}
 
-		$response   = curl_exec($this->client);
-		$this->code = curl_getinfo($this->client, CURLINFO_HTTP_CODE);
+		$responseBody = curl_exec($this->client);
 
-		if($response === false)
+		$code       = curl_getinfo($this->client, CURLINFO_HTTP_CODE);
+		$headerSize = curl_getinfo($this->client, CURLINFO_HEADER_SIZE);
+		$headers    = explode(PHP_EOL, substr($responseBody, 0, $headerSize));
+		$body       = substr($responseBody, $headerSize);
+
+		unset($this->response);
+		$this->response = new HttpResponse($code, $headers, $body);
+
+		if($responseBody === false)
 		{
 			throw new PostrException(curl_error($this->client));
 		} else {
-			return $response;
+			return $body;
 		}
 	}
 
