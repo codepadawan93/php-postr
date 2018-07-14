@@ -33,10 +33,10 @@ class HttpClient {
 	{
 		if(is_array($params) && !empty($params))
 			$params = http_build_query($params);
-		
+
 		if(empty($params))
 			$params = "";
-		
+
 		if($method !== HttpVerbs::get)
 		{
 			$length = strlen($params);
@@ -50,7 +50,7 @@ class HttpClient {
 		else {
 			$endpoint .= (!empty($params)?"?":"") . $params;
 		}
-		
+
 		curl_setopt($this->client, CURLOPT_URL, $endpoint);
 		curl_setopt($this->client, CURLOPT_HTTPHEADER, $this->headers);
 
@@ -68,13 +68,13 @@ class HttpClient {
 			case HttpVerbs::delete:
 				curl_setopt($this->client, CURLOPT_CUSTOMREQUEST, "DELETE");
 				break;
-			default: 
+			default:
 				break;
 		}
 
 		$response   = curl_exec($this->client);
 		$this->code = curl_getinfo($this->client, CURLINFO_HTTP_CODE);
-		
+
 		if($response === false)
 		{
 			throw new PostrException(curl_error($this->client));
