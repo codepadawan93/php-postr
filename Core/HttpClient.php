@@ -9,18 +9,14 @@ use Postr\Exceptions\PostrException;
 class HttpClient {
 
 	private $endpoint;
-	private $headers = [];
-	private $client = null;
+	private $headers;
+	private $client;
 	private $response;
 
 	public function __construct()
 	{
-		$this->client = curl_init();
-		curl_setopt($this->client, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($this->client, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-		curl_setopt($this->client, CURLOPT_VERBOSE, true);
-		curl_setopt($this->client, CURLOPT_HEADER, true);
-		$this->response = new HttpResponse(0, "", "");
+		$this->headers  = [];
+		$this->response = null;
 	}
 
 	public function toString()
@@ -35,6 +31,12 @@ class HttpClient {
 
 	protected function call($endpoint, $method, $params)
 	{
+		$this->client = curl_init();
+		curl_setopt($this->client, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($this->client, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+		curl_setopt($this->client, CURLOPT_VERBOSE, true);
+		curl_setopt($this->client, CURLOPT_HEADER, true);
+
 		if(is_array($params) && !empty($params))
 			$params = http_build_query($params);
 
@@ -91,6 +93,7 @@ class HttpClient {
 		{
 			throw new PostrException(curl_error($this->client));
 		} else {
+			curl_close($this->client);
 			return $body;
 		}
 	}

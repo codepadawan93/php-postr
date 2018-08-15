@@ -20,4 +20,5 @@ function autoload($path, $top)
     }
 }
 
-autoload("", __DIR__);
+if(defined("APPATH"))
+    autoload("", __DIR__);
